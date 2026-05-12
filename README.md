@@ -1,12 +1,12 @@
-# Substrate Desktop
+# ArcStudio
 
 ## Install
 ```
-git clone <this-repository>
+git clone https://github.com/albers4/arclib-studio
 ```
 
 ```
-cd substrate-desktop
+cd arclib-studio
 mkdir build && cd build
 ```
 
