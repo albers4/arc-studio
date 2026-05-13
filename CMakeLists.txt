@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.5 )
 
-project( substrate-desktop )
+project( arc-studio )
 
 find_package( OpenGL REQUIRED )
 
@@ -19,9 +19,9 @@ if( USE-GLFW-GLAD )
     set( GLAD_GL "${GLFW_SOURCE_DIR}/deps/glad/gl.h" )
 endif()
 
-set( SUBSTRATE-DESKTOP-SRC main.cpp )
+set( ARC-STUDIO-SRC main.cpp )
 
-add_executable( substrate-desktop ${SUBSTRATE-DESKTOP-SRC} ${GLAD_GL} )
-target_link_libraries( substrate-desktop ${OPENGL_LIBRARIES} glfw )
+add_executable( arc-studio ${ARC-STUDIO-SRC} ${GLAD_GL} )
+target_link_libraries( arc-studio ${OPENGL_LIBRARIES} glfw )
 
-set_target_properties( substrate-desktop PROPERTIES LINKER_LANGUAGE CXX )
+set_target_properties( arc-studio PROPERTIES LINKER_LANGUAGE CXX )
