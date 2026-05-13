@@ -87,6 +87,8 @@ jobs:
         needs: build
         runs-on: ubuntu-latest
         if: startsWith(github.ref, 'refs/tags/')
+        permissions:
+            contents: write
 
         steps:
             -   name: Download all artifacts
@@ -95,13 +97,19 @@ jobs:
             -   name: Display structure of download files
                 run: ls -R
 
+            -   name: Rename artifacts for release
+                run: |
+                    cp arc-studio-linux/arc-studio arc-studio-linux/arc-studio-linux
+                    cp arc-studio-macos/arc-studio arc-studio-macos/arc-studio-macos
+                    cp arc-studio-windows/arc-studio.exe arc-studio-windows/arc-studio-windows.exe
+
             -   name: Create Release
                 uses: softprops/action-gh-release@v1
                 with:
                     files: |
-                        arc-studio-linux/**
-                        arc-studio-windows/**
-                        arc-studio-macos/**
+                        arc-studio-linux/arc-studio-linux
+                        arc-studio-windows/arc-studio-windows.exe
+                        arc-studio-macos/arc-studio-macos
                     generate_release_notes: true
                     fail_on_unmatched_files: false
                 env:
