@@ -62,9 +62,6 @@ jobs:
             -   name: Build
                 run: cmake --build build --config Release
 
-            -   name: Debug - List build output
-                run: find build -type f -name "arc-studio*" 2>/dev/null || ls -R build/Release/ 2>/dev/null || ls -R build/
-
             -   name: Upload artifact (Linux)
                 if: runner.os == 'Linux'
                 uses: actions/upload-artifact@v4
@@ -77,7 +74,7 @@ jobs:
                 uses: actions/upload-artifact@v4
                 with:
                     name: ${{ matrix.artifact_name }}
-                    path: build/arc-studio
+                    path: build/arc-studio.app/Contents/MacOS/arc-studio
 
             -   name: Upload artifact (Windows)
                 if: runner.os == 'Windows'
