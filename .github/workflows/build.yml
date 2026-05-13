@@ -51,8 +51,8 @@ jobs:
                 if: runner.os == 'Linux'
                 run: |
                     cmake -B build \
-                        -DCMAKE_BUILD_TYPE=Release
-                        -DGLFW_BUILD_WAYLAND=OFF
+                        -DCMAKE_BUILD_TYPE=Release \
+                        -DGLFW_BUILD_WAYLAND=OFF \
                         -DGLFW_BUILD_X11=ON
 
             -   name: Configure CMake (Windows/macOS)
