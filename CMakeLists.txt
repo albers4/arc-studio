@@ -52,6 +52,10 @@ if( WIN32 )
     set_target_properties(arc-studio PROPERTIES
         WIN32_EXECUTABLE TRUE
     )
+    target_link_libraries(arc-studio ${OPENGL_LIBRARIES} glfw)
+    set_target_properties(arc-studio PROPERTIES
+        LINK_FLAGS "/ENTRY:mainCRTStartup"
+    )
 elseif( APPLE )
     set_target_properties(arc-studio PROPERTIES
         MACOSX_BUNDLE TRUE
