@@ -34,18 +34,41 @@ jobs:
                 if: runner.os == 'Linux'
                 run: |
                     sudo apt-get update
-                    sudo apt-get install -y libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
+                    sudo apt-get install -y \
+                    libgl1-mesa-dev \
+                    libxrandr-dev \
+                    libxinerama-dev \
+                    libxcursor-dev \
+                    libxi-dev \
+                    libwayland-dev \
+                    wayland-protocols \
+                    extra-cmake-modules
 
-            -   name: Configure CMake
+            -   name: Configure CMake (Linux)
+                if: runner.os == 'Linux'
+                run: |
+                    cmake -B build \
+                        -DCMAKE_BUILD_TYPE=Release
+                        -DGLFW_BUILD_WAYLAND=OFF
+                        -DGLFW_BUILD_X11=ON
+
+            -   name: Configure CMake (Windows/macOS)
+                if: runner.os != 'Linux'
                 run: cmake -B build -DCMAKE_BUILD_TYPE=Release
 
-            -   name: Upload artifact
+            -   name: Upload artifact (Linux/macOS)
+                if: runner.os != 'Windows'
                 uses: actions/upload-artifact@v4
                 with:
                     name: ${{ matrix.artifact_name }}
-                    path: |
-                        build/arc-studio${{ runner.os == 'Windows' && '.exe' || '' }}
-                        build/Release/arc-studio.exe
+                    path: build/Release/arc-studio
+
+            -   name: Upload artifact (Windows)
+                if: runner.os == 'Windows'
+                uses: actions/upload-artifact@v4
+                with:
+                    name: ${{ matrix.artifact_name }}
+                    path: build/Release/arc-studio.exe
 
     release:
         needs: build
@@ -60,9 +83,10 @@ jobs:
                 uses: softprops/action-gh-release@v1
                 with:
                     files: |
-                        arc-studio-linux/arc-studio*
-                        arc-studio-windows/arc-studio*
-                        arc-studio-macos/arc-studio*
+                        arc-studio-linux/arc-studio
+                        arc-studio-windows/arc-studio.exe
+                        arc-studio-macos/arc-studio
+                    generate_release_notes: true
                 env:
                     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

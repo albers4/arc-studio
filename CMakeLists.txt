@@ -1,9 +1,11 @@
-cmake_minimum_required( VERSION 3.5 )
+cmake_minimum_required( VERSION 3.10 )
 project( arc-studio VERSION 0.1.0 )
 
 # C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+cmake_policy(SET CMP0072 NEW)
 
 # Find OpenGL
 find_package( OpenGL REQUIRED )
@@ -12,6 +14,14 @@ include_directories( ${OPENGL_INCLUDE_DIRS} )
 # GLFW configuration
 set( GLFW_BUILD_DOCS OFF CACHE BOOL "GLFW lib only" )
 set( GLFW_INSTALL OFF CACHE BOOL "GLFW lib only" )
+set( GLFW_BUILD_EXAMPLES OFF CACHE BOOL "GLFW examples" )
+set( GLFW_BUILD_TESTS OFF CACHE BOOL "GLFW tests" )
+
+if( UNIX AND NOT APPLE )
+    set( GLFW_BUILD_WAYLAND OFF CACHE BOOL "Disable Wayland" )
+    set( GLFW_BUILD_X11 ON CACHE BOOL "Enable X11" )
+endif()
+
 set( GLAD_GL "" )
 
 # Check if glfw directory exists
@@ -39,15 +49,12 @@ target_link_libraries( arc-studio ${OPENGL_LIBRARIES} glfw )
 
 # Platform-specific settings
 if( WIN32 )
-    # Windows specific settings
     set_target_properties(arc-studio PROPERTIES
         WIN32_EXECUTABLE TRUE
     )
 elseif( APPLE )
-    # macOS specific settings
     set_target_properties(arc-studio PROPERTIES
         MACOSX_BUNDLE TRUE
-        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/Info.plist"
     )
     target_link_libraries(arc-studio
         "-framework Cocoa"
