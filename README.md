@@ -2,11 +2,11 @@
 
 ## Install
 ```
-git clone https://github.com/albers4/arclib-studio
+git clone https://github.com/albers4/arc-studio
 ```
 
 ```
-cd arclib-studio
+cd arc-studio
 mkdir build && cd build
 ```
 
