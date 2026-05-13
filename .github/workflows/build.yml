@@ -60,7 +60,7 @@ jobs:
                 run: cmake --build build --config Release
 
             -   name: Upload artifact (Linux)
-                if: runner.os != 'Linux'
+                if: runner.os == 'Linux'
                 uses: actions/upload-artifact@v4
                 with:
                     name: ${{ matrix.artifact_name }}
@@ -96,9 +96,9 @@ jobs:
                 uses: softprops/action-gh-release@v1
                 with:
                     files: |
-                        arc-studio-linux/arc-studio
-                        arc-studio-windows/arc-studio.exe
-                        arc-studio-macos/arc-studio
+                        arc-studio-linux/**
+                        arc-studio-windows/**
+                        arc-studio-macos/**
                     generate_release_notes: true
                     fail_on_unmatched_files: false
                 env:
