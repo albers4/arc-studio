@@ -9,6 +9,9 @@ on:
         branches: [ main ]
     workflow_dispatch: # Allow manual triggering
 
+permissions:
+    contents: write
+
 jobs:
     build:
         name: Build on ${{ matrix.os }}
@@ -58,6 +61,9 @@ jobs:
 
             -   name: Build
                 run: cmake --build build --config Release
+
+            -   name: Debug - List build output
+                run: find build -type f -name "arc-studio*" 2>/dev/null || ls -R build/Release/ 2>/dev/null || ls -R build/
 
             -   name: Upload artifact (Linux)
                 if: runner.os == 'Linux'
