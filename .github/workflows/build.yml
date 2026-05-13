@@ -15,17 +15,14 @@ jobs:
         runs-on: ${{ matrix.os }}
         strategy:
             matrix:
-                os: [ubuntu-latest, windows-latest]
+                os: [ubuntu-latest, windows-latest, macos-latest]
                 include:
                     -   os: ubuntu-latest
                         artifact_name: arc-studio-linux
-                        assert_name: arc-studio-linux
                     -   os: windows-latest
                         artifact_name: arc-studio-windows
-                        assert_name: arc-studio-windows.exe
                     -   os: macos-latest
                         artifact_name: arc-studio-macos
-                        assert_name: arc-studio-macos
 
         steps:
             -   name: Checkout repository
@@ -38,14 +35,14 @@ jobs:
                 run: |
                     sudo apt-get update
                     sudo apt-get install -y \
-                    libgl1-mesa-dev \
-                    libxrandr-dev \
-                    libxinerama-dev \
-                    libxcursor-dev \
-                    libxi-dev \
-                    libwayland-dev \
-                    wayland-protocols \
-                    extra-cmake-modules
+                        libgl1-mesa-dev \
+                        libxrandr-dev \
+                        libxinerama-dev \
+                        libxcursor-dev \
+                        libxi-dev \
+                        libwayland-dev \
+                        wayland-protocols \
+                        extra-cmake-modules
 
             -   name: Configure CMake (Linux)
                 if: runner.os == 'Linux'
@@ -59,12 +56,22 @@ jobs:
                 if: runner.os != 'Linux'
                 run: cmake -B build -DCMAKE_BUILD_TYPE=Release
 
-            -   name: Upload artifact (Linux/macOS)
-                if: runner.os != 'Windows'
+            -   name: Build
+                run: cmake --build build --config Release
+
+            -   name: Upload artifact (Linux)
+                if: runner.os != 'Linux'
                 uses: actions/upload-artifact@v4
                 with:
                     name: ${{ matrix.artifact_name }}
-                    path: build/Release/arc-studio
+                    path: build/arc-studio
+
+            -   name: Upload artifact (macOS)
+                if: runner.os == 'macOS'
+                uses: actions/upload-artifact@v4
+                with:
+                    name: ${{ matrix.artifact_name }}
+                    path: build/arc-studio
 
             -   name: Upload artifact (Windows)
                 if: runner.os == 'Windows'
@@ -82,6 +89,9 @@ jobs:
             -   name: Download all artifacts
                 uses: actions/download-artifact@v4
 
+            -   name: Display structure of download files
+                run: ls -R
+
             -   name: Create Release
                 uses: softprops/action-gh-release@v1
                 with:
@@ -90,8 +100,6 @@ jobs:
                         arc-studio-windows/arc-studio.exe
                         arc-studio-macos/arc-studio
                     generate_release_notes: true
+                    fail_on_unmatched_files: false
                 env:
                     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
-                    
