@@ -12,5 +12,6 @@ mkdir build && cd build
 
 ```
 cmake ..
-cmake --build . -j4
+# or cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake --build . -j$(nproc)
 ```
