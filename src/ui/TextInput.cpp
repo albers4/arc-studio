@@ -101,6 +101,7 @@ void TextInput::setFocused(bool focused) {
         lastBlinkTime = glfwGetTime();
     } else {
         commitValue();
+        clearSelection();
         isSelecting = false;
     }
 }
@@ -109,7 +110,6 @@ void TextInput::update(float mouseX, float mouseY, bool mousePressed) {
     Widget::update(mouseX, mouseY, mousePressed);
 
     bool justPressed = mousePressed && !wasPressed;
-    bool justReleased = !mousePressed && wasPressed;
     wasPressed = mousePressed;
 
     double currentTime = glfwGetTime();
@@ -119,11 +119,12 @@ void TextInput::update(float mouseX, float mouseY, bool mousePressed) {
             lastBlinkTime = currentTime;
         }
 
-        if (hovered && isSelecting) {
+        if ((hovered || isSelecting) && (mousePressed || justPressed)) {
             float padding = 6.0f;
             float localMouseX = mouseX - position.x - padding + scrollOffset;
             float currentX = 0;
             int newPos = 0;
+
             for (char c : editBuffer) {
                 if (c < 32 || c > 126) continue;
                 float charW = font.charData.data[c - 32].xadvance;
@@ -136,18 +137,26 @@ void TextInput::update(float mouseX, float mouseY, bool mousePressed) {
             }
 
             if (justPressed && hovered) {
+                // start of a new click/drag
                 cursorPos = newPos;
                 selectionStart = newPos;
                 isSelecting = true;
             } else if (isSelecting && mousePressed) {
+                // continuing a drag
                 cursorPos = newPos;
-            } else if (justReleased) {
+            } else if (!mousePressed && isSelecting) {
+                // drag finished
                 isSelecting = false;
                 if (selectionStart == cursorPos) {
                     selectionStart = -1;
                 }
             }
         }
+
+        if (!mousePressed) {
+            isSelecting = false;
+        }
+
     } else {
         cursorVisible = false;
         isSelecting = false;
@@ -213,6 +222,9 @@ void TextInput::onKey(int key, int action, int mods, UIManager& ui) {
     if (key == GLFW_KEY_BACKSPACE) {
         if (selectionStart != -1 && selectionStart != cursorPos) {
             deleteSelection();
+        } else if (ctrl) {
+            editBuffer.erase(0, cursorPos);
+            cursorPos = 0;
         } else if (cursorPos > 0) {
             editBuffer.erase(cursorPos - 1, 1) ;
             cursorPos--;
@@ -222,6 +234,8 @@ void TextInput::onKey(int key, int action, int mods, UIManager& ui) {
     if (key == GLFW_KEY_DELETE) {
         if (selectionStart != -1 && selectionStart != cursorPos) {
             deleteSelection();
+        } else if (ctrl) {
+            editBuffer.erase(cursorPos);
         } else if (cursorPos > 0) {
             editBuffer.erase(cursorPos, 1) ;
         }
