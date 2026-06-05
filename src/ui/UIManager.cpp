@@ -1,0 +1,30 @@
+#include "UIManager.h"
+
+UIManager::UIManager(BatchRenderer& ren) : renderer(ren) {}
+
+void UIManager::rect(float x, float y, float w, float h, glm::vec4 col) {
+    renderer.rect(x, y, w, h, col);
+}
+
+void UIManager::drawString(float x, float y, const std::string& text, const FontAtlas& font, glm::vec4 color) {
+    float cx = x;
+    for (char c : text) {
+        if (c < 32 || c > 126) continue;
+        const stbtt_bakedchar& ch = font.charData.data[c - 32];
+        float w = ch.x1 - ch.x0;
+        float h = ch.y1 - ch.y0;
+        if (w <= 0 || h <= 0) continue;
+
+        float u0 = (float)ch.x0 / (float)font.atlasW;
+        float v0 = (float)ch.y0 / (float)font.atlasH;
+        float u1 = (float)ch.x1 / (float)font.atlasW;
+        float v1 = (float)ch.y1 / (float)font.atlasH;
+
+        renderer.textQuad(cx + ch.xoff, y + ch.yoff, w, h, u0, v0, u1, v1, color);
+        cx += ch.xadvance;
+    }
+}
+
+void UIManager::flush(const glm::mat4& proj, const FontAtlas& font) {
+    renderer.flush(proj, font.textureID);
+}
