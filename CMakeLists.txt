@@ -73,6 +73,26 @@ foreach( shader ${SHADER_FILES} )
     configure_file( ${shader} ${CMAKE_BINARY_DIR}/shaders/ COPYONLY )
 endforeach()
 
+# --- code formatting ---
+find_program(CLANG_FORMAT_EXECUTABLE NAMES clang-format)
+
+if( CLANG_FORMAT_EXECUTABLE )
+    message( STATUS "Found clang-format" )
+
+    file( GLOB_RECURSE ALL_SOURCE_FILES
+        ${CMAKE_SOURCE_DIR}/src/*.cpp
+        ${CMAKE_SOURCE_DIR}/src/*.h
+    )
+
+    add_custom_target( format
+        COMMAND ${CLANG_FORMAT_EXECUTABLE} -i ${ALL_SOURCE_FILES}
+        COMMENT "Running clang-format on all source files..."
+        VERBATIM
+    )
+else()
+    message( WARNING "clang-format not found!" )
+endif()
+
 # Create executable
 add_executable( arc-studio ${ARC-STUDIO-SRC} )
 
