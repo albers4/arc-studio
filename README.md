@@ -2,7 +2,7 @@
 
 ## Install
 ```
-git clone https://github.com/albers4/arc-studio
+git clone --recursive https://github.com/albers4/arc-studio
 ```
 
 ```
