@@ -1,14 +1,53 @@
 #include "UIManager.h"
 
-UIManager::UIManager(BatchRenderer& ren) : renderer(ren) {}
+UIManager::UIManager(BatchRenderer& ren) : renderer(ren), focusedWidget(nullptr) {}
 
-void UIManager::updateMouse(float x, float y, bool pressed) {
+void UIManager::updateMouse(float x, float y, bool pressed, bool justPressed) {
     mouseX = x;
     mouseY = y;
     mousePressed = pressed;
 
+    if (justPressed) {
+        focusedWidget = nullptr;
+
+        for (auto it = widgets.rbegin(); it != widgets.rend(); ++it) {
+            if ((*it)->contains(mouseX, mouseY)) {
+                focusedWidget = it->get();
+                break;
+            }
+        }
+    }
+
     for (auto& widget : widgets) {
+        widget->setFocused(widget.get() == focusedWidget);
         widget->update(mouseX, mouseY, mousePressed);
+    }
+}
+
+void UIManager::onKey(int key, int action) {
+    if (focusedWidget) {
+        focusedWidget->onKey(key, action, *this);
+    }
+}
+
+void UIManager::onChar(unsigned int codepoint) {
+    if (focusedWidget) {
+        focusedWidget->onChar(codepoint);
+    }
+}
+
+void UIManager::clearFocus() {
+    focusedWidget = nullptr;
+    for (auto& widget : widgets) {
+        widget->setFocused(false);
+    }
+}
+
+void UIManager::updateScroll(float delta) {
+    for (auto& widget : widgets) {
+        if (widget->hovered) {
+            widget->onScroll(delta);
+        }
     }
 }
 

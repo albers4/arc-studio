@@ -4,6 +4,8 @@
 #include "../ui/FontAtlas.h"
 #include "../ui/UIManager.h"
 #include "../ui/Button.h"
+#include "../ui/Slider.h"
+#include "../ui/TextInput.h"
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -28,11 +30,28 @@ Application::Application(const std::string& title, int w, int h)
 
     glfwMaximizeWindow(window);
     glfwMakeContextCurrent(window);
+    glfwSetWindowSizeLimits(window, 1200, 800, GLFW_DONT_CARE, GLFW_DONT_CARE);
     
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cerr << "Failed to initialize GLAD" << std::endl;
         exit(EXIT_FAILURE);
     }
+
+    glfwSetWindowUserPointer(window, this);
+    glfwSetScrollCallback(window, [](GLFWwindow* w, double xoffset, double yoffset) {
+        auto* app = static_cast<Application*>(glfwGetWindowUserPointer(w));
+        if (app) {
+            app->onScroll(xoffset, yoffset);
+        }
+    });
+    glfwSetKeyCallback(window, [](GLFWwindow* w, int key, int scancode, int action, int mods) {
+        auto* app = static_cast<Application*>(glfwGetWindowUserPointer(w));
+        if (app) app->onKey(key, scancode, action, mods);
+    });
+    glfwSetCharCallback(window, [](GLFWwindow* w, unsigned int codepoint) {
+        auto* app = static_cast<Application*>(glfwGetWindowUserPointer(w));
+        if (app) app->onChar(codepoint);
+    });
 
     initOpenGL();
 }
@@ -69,6 +88,23 @@ void Application::initOpenGL() {
     myButton.onClick = []() {
         std::cout << "Render button clicked" << std::endl;
     };
+
+    auto& mySlider = ui->addWidget<Slider>(20, 60, 200, 30, "Brush Slider", *font, 0.0f, 100.0f, 50.0f);
+    mySlider.onClick = [&]() {
+        std::cout << "Slider value: " << mySlider.getValue() << std::endl;
+    };
+
+    static std::string myName = "ArcStudio";
+    auto& nameInput = ui->addWidget<TextInput>(20, 100, 200, 30, "Name", *font);
+    nameInput.bind(myName);
+
+    static int brushSize = 50;
+    auto& sizeInput = ui->addWidget<TextInput>(20, 150, 200, 30, "Brush Size", *font);
+    sizeInput.bind(brushSize, 1, 100);
+
+    static float exposure = 1.0f;
+    auto& expInput = ui->addWidget<TextInput>(20, 200, 200, 30, "Exposure", *font);
+    expInput.bind(exposure, 0.0f, 1.0f);
 }
 
 void Application::run() {
@@ -80,12 +116,28 @@ void Application::run() {
     }
 }
 
+void Application::onScroll(double xoffset, double yoffset) {
+    if (ui) ui->updateScroll(yoffset);
+}
+
+void Application::onKey(int key, int scancode, int action, int mods) {
+    if (ui) ui->onKey(key, action);
+}
+
+void Application::onChar(unsigned int codepoint) {
+    if (ui) ui->onChar(codepoint);
+}
+
 void Application::update() {
     double mx, my;
     glfwGetCursorPos(window, &mx, &my);
     bool leftClick = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
 
-    ui->updateMouse(mx, my, leftClick);
+    static bool wasPressed = false;
+    bool justPressed = leftClick && !wasPressed;
+
+    ui->updateMouse(mx, my, leftClick, justPressed);
+    wasPressed = leftClick;
 }
 
 void Application::render() {
@@ -98,7 +150,7 @@ void Application::render() {
     glm::mat4 proj = glm::ortho(0.0f, (float)w, (float)h, 0.0f, -1.0f, 1.0f);
 
     // --- UI Drawing Code ---
-    ui->rect(0, 0, w, 50, glm::vec4(0.3f, 0.3f, 0.35f, 1.0f)); // Header
+    //ui->rect(0, 0, w, 50, glm::vec4(0.3f, 0.3f, 0.35f, 1.0f)); // Header
 
     ui->flush(proj, *font);
 }

@@ -12,17 +12,27 @@ private:
     std::vector<std::unique_ptr<Widget>> widgets;
     float mouseX = 0, mouseY = 0;
     bool mousePressed = false;
+    Widget* focusedWidget = nullptr;
     
 public:
     UIManager(BatchRenderer& ren);
 
-    void updateMouse(float x, float y, bool pressed);
+    void updateMouse(float x, float y, bool pressed, bool justPressed);
+    void updateScroll(float delta);
+    void onKey(int key, int action);
+    void onChar(unsigned int codepoint);
+
+    void clearFocus();
 
     template<typename T, typename... Args>
     T& addWidget(Args&&... args) {
         auto widget = std::make_unique<T>(std::forward<Args>(args)...);
         T* ptr = widget.get();
-        widgets.push_back(std::move(widget));
+
+        widgets.push_back(
+            std::unique_ptr<Widget>(static_cast<Widget*>(widget.release()))
+        );
+
         return *ptr;
     }
     

@@ -18,6 +18,9 @@ public:
     Application& operator=(const Application&) = delete;
 
     void run();
+    void onScroll(double xoffset, double yoffset);
+    void onKey(int key, int scancode, int action, int mods);
+    void onChar(unsigned int codepoint);
 
 private:
     GLFWwindow* window = nullptr;

@@ -6,10 +6,12 @@ Widget::Widget(float x, float y, float w, float h, const std::string& label)
 
 void Widget::update(float mouseX, float mouseY, bool mousePressed) {
     hovered = contains(mouseX, mouseY);
+}
 
-    if (hovered && mousePressed && onClick) {
-        onClick();
-    }
+void Widget::onScroll(float delta) {}
+
+void Widget::setFocused(bool focused) {
+    isFocused = focused;
 }
 
 bool Widget::contains(float mx, float my) const {

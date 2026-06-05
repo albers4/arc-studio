@@ -5,10 +5,14 @@
 
 class Button : public Widget {
 private:
-    glm::vec4 color;
-    glm::vec4 hoverColor;
     const FontAtlas& font;
     float textWidth;
+
+    glm::vec4 color;
+    glm::vec4 hoverColor;
+
+    bool isPressed = false;
+    bool wasPressed = false;
 
 public:
     Button(
@@ -21,5 +25,6 @@ public:
         glm::vec4 color = glm::vec4(0.5f), 
         glm::vec4 hoverColor = glm::vec4(0.7f)
     );
+    void update(float mouseX, float mouseY, bool mousePressed) override;
     void draw(UIManager& ui) override;
 };

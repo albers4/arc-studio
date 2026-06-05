@@ -12,6 +12,7 @@ public:
     GLuint textureID = 0;
     StbttCharData charData;
     int atlasW = 0, atlasH = 0;
+    float baselineOffset = 0.0f;
     float ascent = 0.0f;
     float descent = 0.0f;
     float lineGap = 0.0f;

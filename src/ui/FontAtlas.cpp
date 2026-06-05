@@ -41,6 +41,7 @@ FontAtlas::FontAtlas(const std::string& filename, float pxSize, int width, int h
         ascent = asc * scale;
         descent = desc * scale;
         lineGap = lgap * scale;
+        baselineOffset = (ascent + descent) / 2.0f;
     }
     
     glGenTextures(1, &textureID);
