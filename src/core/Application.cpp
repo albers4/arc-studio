@@ -3,6 +3,7 @@
 #include "../renderer/BatchRenderer.h"
 #include "../ui/FontAtlas.h"
 #include "../ui/UIManager.h"
+#include "../ui/Button.h"
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -63,6 +64,11 @@ void Application::initOpenGL() {
 
     renderer = new BatchRenderer(*uiShader);
     ui = new UIManager(*renderer);
+
+    auto& myButton = ui->addWidget<Button>(20, 10, 100, 30, "Render", *font);
+    myButton.onClick = []() {
+        std::cout << "Render button clicked" << std::endl;
+    };
 }
 
 void Application::run() {
@@ -77,6 +83,9 @@ void Application::run() {
 void Application::update() {
     double mx, my;
     glfwGetCursorPos(window, &mx, &my);
+    bool leftClick = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+
+    ui->updateMouse(mx, my, leftClick);
 }
 
 void Application::render() {
@@ -90,11 +99,6 @@ void Application::render() {
 
     // --- UI Drawing Code ---
     ui->rect(0, 0, w, 50, glm::vec4(0.3f, 0.3f, 0.35f, 1.0f)); // Header
-    ui->rect(20, 10, 100, 30, glm::vec4(0.5f, 0.6f, 0.7f, 1.0f));
-    
-    ui->drawString(35, 20, "File", *font);
-    ui->drawString(100, 20, "Edit", *font);
-    ui->drawString(30, 25, "Click Me", *font);
 
     ui->flush(proj, *font);
 }

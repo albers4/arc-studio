@@ -31,6 +31,17 @@ FontAtlas::FontAtlas(const std::string& filename, float pxSize, int width, int h
     }
     
     stbtt_BakeFontBitmap(buffer.data(), 0, pxSize, bitmap.data(), atlasW, atlasH, 32, 96, charData.data);
+
+    stbtt_fontinfo info;
+    if (stbtt_InitFont(&info, buffer.data(), 0)) {
+        int asc, desc, lgap;
+        stbtt_GetFontVMetrics(&info, &asc, &desc, &lgap);
+
+        scale = stbtt_ScaleForPixelHeight(&info, pxSize);
+        ascent = asc * scale;
+        descent = desc * scale;
+        lineGap = lgap * scale;
+    }
     
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);

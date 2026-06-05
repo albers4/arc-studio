@@ -2,6 +2,16 @@
 
 UIManager::UIManager(BatchRenderer& ren) : renderer(ren) {}
 
+void UIManager::updateMouse(float x, float y, bool pressed) {
+    mouseX = x;
+    mouseY = y;
+    mousePressed = pressed;
+
+    for (auto& widget : widgets) {
+        widget->update(mouseX, mouseY, mousePressed);
+    }
+}
+
 void UIManager::rect(float x, float y, float w, float h, glm::vec4 col) {
     renderer.rect(x, y, w, h, col);
 }
@@ -26,5 +36,11 @@ void UIManager::drawString(float x, float y, const std::string& text, const Font
 }
 
 void UIManager::flush(const glm::mat4& proj, const FontAtlas& font) {
+    for (auto& widget : widgets) {
+        if (widget->visible) {
+            widget->draw(*this);
+        }
+    }
+
     renderer.flush(proj, font.textureID);
 }
