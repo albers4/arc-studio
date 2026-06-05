@@ -1,64 +1,52 @@
 #include "Button.h"
-#include "UIManager.h"
 #include "FontAtlas.h"
 #include "Theme.h"
+#include "UIManager.h"
 
-Button::Button(
-    float x, 
-    float y, 
-    float w, 
-    float h, 
-    const std::string& label, 
-    const FontAtlas& font,
-    glm::vec4 color,
-    glm::vec4 hoverColor
-)
-    : Widget(x, y, w, h, label), font(font), color(color), hoverColor(hoverColor)
-{
-    textWidth = 0;
-    for (char c : label) {
-        if (c >= 32 && c <= 126) {
-            textWidth += font.charData.data[c - 32].xadvance;
-        }
+Button::Button(float x, float y, float w, float h, const std::string &label,
+               const FontAtlas &font, glm::vec4 color, glm::vec4 hoverColor)
+    : Widget(x, y, w, h, label), font(font), color(color),
+      hoverColor(hoverColor) {
+  textWidth = 0;
+  for (char c : label) {
+    if (c >= 32 && c <= 126) {
+      textWidth += font.charData.data[c - 32].xadvance;
     }
+  }
 }
 
 void Button::update(float mouseX, float mouseY, bool mousePressed) {
-    hovered = contains(mouseX, mouseY);
+  hovered = contains(mouseX, mouseY);
 
-    bool justPressed = mousePressed && !wasPressed;
+  bool justPressed = mousePressed && !wasPressed;
 
-    if (hovered && justPressed) {
-        isPressed = true;
+  if (hovered && justPressed) {
+    isPressed = true;
+  }
+
+  if (!mousePressed) {
+    if (isPressed && hovered && onClick) {
+      onClick();
     }
 
-    if (!mousePressed) {
-        if (isPressed && hovered && onClick) {
-            onClick();
-        }
+    isPressed = false;
+  }
 
-        isPressed = false;
-    }
-
-    wasPressed = mousePressed;
+  wasPressed = mousePressed;
 }
 
-void Button::draw(UIManager& ui) {
-    const auto& theme = Theme::get();
+void Button::draw(UIManager &ui) {
+  const auto &theme = Theme::get();
 
-    glm::vec4 finalColor = hovered ? theme.colors.surfaceHover : theme.colors.surface;
-    if (isPressed) finalColor = theme.colors.accent * 0.8f;
+  glm::vec4 finalColor =
+      hovered ? theme.colors.surfaceHover : theme.colors.surface;
+  if (isPressed)
+    finalColor = theme.colors.accent * 0.8f;
 
-    ui.rect(position.x, position.y, size.x, size.y, finalColor);
+  ui.rect(position.x, position.y, size.x, size.y, finalColor);
 
-    float xPos = position.x + (size.x - textWidth) / 2.0f;
-    float yPos = position.y + (size.y / 2.0f) + font.baselineOffset;
+  float xPos = position.x + (size.x - textWidth) / 2.0f;
+  float yPos = position.y + (size.y / 2.0f) + font.baselineOffset;
 
-    ui.drawString(
-        xPos,
-        yPos,
-        label,
-        font,
-        glm::vec4(1.0f)
-    );
+  ui.drawString(xPos, yPos, label, font, glm::vec4(1.0f));
 }
