@@ -1,5 +1,6 @@
 #include "TextInput.h"
 #include "UIManager.h"
+#include "Theme.h"
 #include <algorithm>
 #include <stdexcept>
 #include <GLFW/glfw3.h>
@@ -119,11 +120,13 @@ void TextInput::update(float mouseX, float mouseY, bool mousePressed) {
             lastBlinkTime = currentTime;
         }
 
-        if ((hovered || isSelecting) && (mousePressed || justPressed)) {
+        int newPos = cursorPos;
+        //if ((hovered || isSelecting) && (mousePressed || justPressed)) {
+        if (hovered || isSelecting) {
             float padding = 6.0f;
             float localMouseX = mouseX - position.x - padding + scrollOffset;
             float currentX = 0;
-            int newPos = 0;
+            newPos = 0;
 
             for (char c : editBuffer) {
                 if (c < 32 || c > 126) continue;
@@ -135,26 +138,26 @@ void TextInput::update(float mouseX, float mouseY, bool mousePressed) {
                     break;
                 }
             }
+        }
 
-            if (justPressed && hovered) {
-                // start of a new click/drag
-                cursorPos = newPos;
-                selectionStart = newPos;
-                isSelecting = true;
-            } else if (isSelecting && mousePressed) {
-                // continuing a drag
-                cursorPos = newPos;
-            } else if (!mousePressed && isSelecting) {
-                // drag finished
-                isSelecting = false;
-                if (selectionStart == cursorPos) {
-                    selectionStart = -1;
-                }
+        if (justPressed && hovered) {
+            // start of a new click/drag
+            cursorPos = newPos;
+            selectionStart = newPos;
+            isSelecting = true;
+        } else if (isSelecting && mousePressed) {
+            // continuing a drag
+            cursorPos = newPos;
+        } else if (!mousePressed && isSelecting) {
+            // drag finished
+            isSelecting = false;
+            if (selectionStart == cursorPos) {
+                selectionStart = -1;
             }
         }
 
-        if (!mousePressed) {
-            isSelecting = false;
+        if (!mousePressed && !isSelecting && selectionStart == cursorPos) {
+            selectionStart = -1;
         }
 
     } else {
@@ -271,18 +274,22 @@ void TextInput::deleteSelection() {
 }
 
 void TextInput::draw(UIManager& ui) {
+    const auto& theme = Theme::get();
+    const auto& m = theme.metrics;
+    const auto& c = theme.colors;
+
     // background
-    glm::vec4 bgColor = isFocused ? glm::vec4(0.2f, 0.2f, 0.25f, 1.0f) : glm::vec4(0.15f, 0.15f, 0.18f, 1.0f);
+    glm::vec4 bgColor = isFocused ? c.surface : c.background;
     ui.rect(position.x, position.y, size.x, size.y, bgColor);
 
     // border
-    glm::vec4 borderColor = isFocused ? glm::vec4(0.5f, 0.7f, 0.9f, 1.0f) : glm::vec4(0.3f, 0.3f, 0.35f, 1.0f);
-    ui.rect(position.x, position.y, size.x, 2.0f, borderColor); // top
-    ui.rect(position.x, position.y + size.y - 2.0f, size.x, 2.0f, borderColor); // bottom
-    ui.rect(position.x, position.y, 2.0f, size.y, borderColor); // left
-    ui.rect(position.x + size.x - 2.0f, position.y, 2.0f, size.y, borderColor); // right
+    glm::vec4 borderColor = isFocused ? c.accent : c.border;
+    ui.rect(position.x, position.y, size.x, m.borderWidth, borderColor); // top
+    ui.rect(position.x, position.y + size.y - m.borderWidth, size.x, m.borderWidth, borderColor); // bottom
+    ui.rect(position.x, position.y, m.borderWidth, size.y, borderColor); // left
+    ui.rect(position.x + size.x - m.borderWidth, position.y, m.borderWidth, size.y, borderColor); // right
 
-    float padding = 6.0f;
+    float padding = m.padding;
     float textY = position.y + (size.y / 2.0f) + font.baselineOffset;
     float visibleWidth = size.x - (padding * 2);
 
@@ -328,6 +335,7 @@ void TextInput::draw(UIManager& ui) {
         }
     }
 
+    // text drawing
     float currentX = padding - scrollOffset;
     for (char c : editBuffer) {
         if (c < 32 || c > 126) continue;
@@ -340,7 +348,7 @@ void TextInput::draw(UIManager& ui) {
         currentX += charW;
     }
 
-
+    // cursor
     if (isFocused && cursorVisible) {
         float cursorScreenX = position.x + padding + (cursorLocalX - scrollOffset);
         cursorScreenX = std::clamp(cursorScreenX, position.x + padding, position.x + size.x - padding);

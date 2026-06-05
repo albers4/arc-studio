@@ -6,6 +6,7 @@
 #include "../ui/Button.h"
 #include "../ui/Slider.h"
 #include "../ui/TextInput.h"
+#include "../ui/Theme.h"
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -75,6 +76,7 @@ void Application::initOpenGL() {
     // Initialize Resources
     uiShader = new Shader("../shaders/ui.vert", "../shaders/ui.frag");
     font = new FontAtlas("../assets/fonts/arial.ttf", 16.0f);
+    const auto& theme = Theme::get();
     
     if (font->textureID == 0) {
         std::cerr << "Failed to load font!" << std::endl;

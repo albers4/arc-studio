@@ -1,6 +1,7 @@
 #include "Button.h"
 #include "UIManager.h"
 #include "FontAtlas.h"
+#include "Theme.h"
 
 Button::Button(
     float x, 
@@ -43,12 +44,10 @@ void Button::update(float mouseX, float mouseY, bool mousePressed) {
 }
 
 void Button::draw(UIManager& ui) {
-    glm::vec4 finalColor = color;
-    if (isPressed) {
-        finalColor = hoverColor - glm::vec4(0.15f, 0.15f, 0.15f, 0.0f);
-    } else if (hovered) {
-        finalColor = hoverColor;
-    }
+    const auto& theme = Theme::get();
+
+    glm::vec4 finalColor = hovered ? theme.colors.surfaceHover : theme.colors.surface;
+    if (isPressed) finalColor = theme.colors.accent * 0.8f;
 
     ui.rect(position.x, position.y, size.x, size.y, finalColor);
 
