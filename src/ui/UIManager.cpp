@@ -24,9 +24,9 @@ void UIManager::updateMouse(float x, float y, bool pressed, bool justPressed) {
     }
 }
 
-void UIManager::onKey(int key, int action) {
+void UIManager::onKey(int key, int action, int mods) {
     if (focusedWidget) {
-        focusedWidget->onKey(key, action, *this);
+        focusedWidget->onKey(key, action, mods, *this);
     }
 }
 

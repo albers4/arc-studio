@@ -24,7 +24,7 @@ public:
     virtual void setFocused(bool focused);
 
     virtual void onScroll(float delta);
-    virtual void onKey(int key, int action, UIManager& ui) {}
+    virtual void onKey(int key, int action, int mods, UIManager& ui) {}
     virtual void onChar(unsigned int codepoint) {}
 
     bool contains(float mx, float my) const;

@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <functional>
 
 class UIManager {
 private:
@@ -17,9 +18,12 @@ private:
 public:
     UIManager(BatchRenderer& ren);
 
+    std::function<std::string()> getClipboard;
+    std::function<void(const std::string&)> setClipboard;
+
     void updateMouse(float x, float y, bool pressed, bool justPressed);
     void updateScroll(float delta);
-    void onKey(int key, int action);
+    void onKey(int key, int action, int mods);
     void onChar(unsigned int codepoint);
 
     void clearFocus();

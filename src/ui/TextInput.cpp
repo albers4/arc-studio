@@ -97,40 +97,139 @@ void TextInput::setFocused(bool focused) {
     isFocused = focused;
     if (isFocused) {
         loadValueToBuffer();
-        cursorTimer = 0.0f;
         cursorVisible = true;
+        lastBlinkTime = glfwGetTime();
     } else {
         commitValue();
+        isSelecting = false;
     }
 }
 
 void TextInput::update(float mouseX, float mouseY, bool mousePressed) {
     Widget::update(mouseX, mouseY, mousePressed);
 
+    bool justPressed = mousePressed && !wasPressed;
+    bool justReleased = !mousePressed && wasPressed;
+    wasPressed = mousePressed;
+
+    double currentTime = glfwGetTime();
     if (isFocused) {
-        cursorTimer += 0.016f;
-        if (cursorTimer > 1.5f) {
+        if (currentTime - lastBlinkTime > 0.5) {
             cursorVisible = !cursorVisible;
-            cursorTimer = 0.0f;
+            lastBlinkTime = currentTime;
+        }
+
+        if (hovered && isSelecting) {
+            float padding = 6.0f;
+            float localMouseX = mouseX - position.x - padding + scrollOffset;
+            float currentX = 0;
+            int newPos = 0;
+            for (char c : editBuffer) {
+                if (c < 32 || c > 126) continue;
+                float charW = font.charData.data[c - 32].xadvance;
+                if (localMouseX > currentX + charW / 2.0f) {
+                    newPos++;
+                    currentX += charW;
+                } else {
+                    break;
+                }
+            }
+
+            if (justPressed && hovered) {
+                cursorPos = newPos;
+                selectionStart = newPos;
+                isSelecting = true;
+            } else if (isSelecting && mousePressed) {
+                cursorPos = newPos;
+            } else if (justReleased) {
+                isSelecting = false;
+                if (selectionStart == cursorPos) {
+                    selectionStart = -1;
+                }
+            }
         }
     } else {
         cursorVisible = false;
+        isSelecting = false;
     }
 }
 
 void TextInput::onChar(unsigned int codepoint) {
     if (!isFocused) return;
     if (codepoint >= 32 && codepoint <= 126) {
-        editBuffer += static_cast<char>(codepoint);
+        deleteSelection();
+        editBuffer.insert(cursorPos, 1, static_cast<char>(codepoint));
+        cursorPos++;
     }
 }
 
-void TextInput::onKey(int key, int action, UIManager& ui) {
+void TextInput::onKey(int key, int action, int mods, UIManager& ui) {
     if (!isFocused || (action != GLFW_PRESS && action != GLFW_REPEAT)) return;
 
-    if (key == GLFW_KEY_BACKSPACE && !editBuffer.empty()) {
-        editBuffer.pop_back();
-    } else if (key == GLFW_KEY_ENTER || key == GLFW_KEY_KP_ENTER) {
+    bool ctrl = (mods & GLFW_MOD_CONTROL) || (mods & GLFW_MOD_SUPER);
+    bool shift = (mods & GLFW_MOD_SHIFT);
+
+    // --- shortcuts ---
+    if (ctrl) {
+        if (key == GLFW_KEY_A) { selectAll(); return; }
+        if (key == GLFW_KEY_C) { ui.setClipboard(getSelectedText()); return; }
+        if (key == GLFW_KEY_X) { ui.setClipboard(getSelectedText()); deleteSelection(); return; }
+        if (key == GLFW_KEY_V) {
+            std::string clip = ui.getClipboard();
+            deleteSelection();
+            editBuffer.insert(cursorPos, clip);
+            cursorPos += clip.length();
+            return;
+        }
+    }
+
+    // --- navigation ---
+    if (key == GLFW_KEY_LEFT) {
+        if (cursorPos > 0) cursorPos--;
+        if (!shift) clearSelection();
+        else if (selectionStart == -1) selectionStart = cursorPos + 1;
+        return;
+    }
+    if (key == GLFW_KEY_RIGHT) {
+        if (cursorPos < (int)editBuffer.length()) cursorPos++;
+        if (!shift) clearSelection();
+        else if (selectionStart == -1) selectionStart = cursorPos - 1;
+        return;
+    }
+    if (key == GLFW_KEY_HOME) {
+        if (shift && selectionStart == -1) selectionStart = cursorPos;
+        cursorPos = 0; 
+        if (!shift) clearSelection();
+        return;
+    }
+    if (key == GLFW_KEY_END) {
+        if (shift && selectionStart == -1) selectionStart = cursorPos;
+        cursorPos = editBuffer.length(); 
+        if (!shift) clearSelection();
+        return;
+    }
+
+    // --- deletion ---
+    if (key == GLFW_KEY_BACKSPACE) {
+        if (selectionStart != -1 && selectionStart != cursorPos) {
+            deleteSelection();
+        } else if (cursorPos > 0) {
+            editBuffer.erase(cursorPos - 1, 1) ;
+            cursorPos--;
+        }
+        return;
+    }
+    if (key == GLFW_KEY_DELETE) {
+        if (selectionStart != -1 && selectionStart != cursorPos) {
+            deleteSelection();
+        } else if (cursorPos > 0) {
+            editBuffer.erase(cursorPos, 1) ;
+        }
+        return;
+    }
+
+    // --- commit/cancel ---
+    if (key == GLFW_KEY_ENTER || key == GLFW_KEY_KP_ENTER) {
         commitValue();
         isFocused = false;
         ui.clearFocus();
@@ -139,6 +238,22 @@ void TextInput::onKey(int key, int action, UIManager& ui) {
         isFocused = false;
         ui.clearFocus();
     }
+}
+
+std::string TextInput::getSelectedText() {
+    if (selectionStart == -1 || selectionStart == cursorPos) return "";
+    int start = std::min(selectionStart, cursorPos);
+    int end = std::max(selectionStart, cursorPos);
+    return editBuffer.substr(start, end - start);
+}
+
+void TextInput::deleteSelection() {
+    if (selectionStart == -1 || selectionStart == cursorPos) return;
+    int start = std::min(selectionStart, cursorPos);
+    int end = std::max(selectionStart, cursorPos);
+    editBuffer.erase(start, end - start);
+    cursorPos = start;
+    selectionStart = -1;
 }
 
 void TextInput::draw(UIManager& ui) {
@@ -153,17 +268,69 @@ void TextInput::draw(UIManager& ui) {
     ui.rect(position.x, position.y, 2.0f, size.y, borderColor); // left
     ui.rect(position.x + size.x - 2.0f, position.y, 2.0f, size.y, borderColor); // right
 
+    float padding = 6.0f;
     float textY = position.y + (size.y / 2.0f) + font.baselineOffset;
-    ui.drawString(position.x + 6.0f, textY, editBuffer, font, glm::vec4(1.0f));
+    float visibleWidth = size.x - (padding * 2);
+
+    float cursorLocalX = 0;
+    for (int i = 0; i < cursorPos; i++) {
+        if (editBuffer[i] >= 32 && editBuffer[i] <= 126)
+            cursorLocalX += font.charData.data[editBuffer[i] - 32].xadvance;
+    }
+
+    if (cursorLocalX - scrollOffset > visible) {
+        scrollOffset = cursorLocalX - visibleWidth;
+    }
+    if (cursorLocalX - scrollOffset < 0) {
+        scrollOffset = cursorLocalX;
+    }
+
+    float totalTextWidth = 0;
+    for (char c : editBuffer) if (c >= 32 && c <= 126) totalTextWidth += font.charData.data[c - 32].xadvance;
+    float maxScroll = std::max(0.0f, totalTextWidth - visibleWidth);
+    scrollOffset = std::clamp(scrollOffset, 0.0f, maxScroll);
+
+    if (selectionStart != -1 && selectionStart != cursorPos) {
+        int startIndex = std::min(selectionStart, cursorPos);
+        int endIndex = std::max(selectionStart, cursorPos);
+
+        float startX = padding - scrollOffset;
+        for (int i = 0; i < startIndex; i++) startX += font.charData.data[editBuffer[i] - 32].xadvance;
+
+        float endX = startX;
+        for (int i = startIndex; i < endIndex; i++) endX += font.charData.data[editBuffer[i] - 32].xadvance;
+
+        float screenStartX = position.x + startX;
+        float screenEndX = position.x + endX;
+
+        float visibleLeft = position.x + padding;
+        float visibleRight = position.x + size.x - padding;
+
+        screenStartX = std::max(screenStartX, visibleLeft);
+        screenEndX = std::min(screenEndX, visibleRight);
+
+        if (screenEndX > screenStartX) {
+            ui.rect(screenStartX, position.y + 4.0f, screenEndX - screenStartX, size.y - 8.0f, glm::vec4(0.3f, 0.5f, 0.8f, 0.8f));
+        }
+    }
+
+    float currentX = padding - scrollOffset;
+    for (char c : editBuffer) {
+        if (c < 32 || c > 126) continue;
+        float charW = font.charData.data[c - 32].xadvance;
+
+        if (currentX + charW > padding && currentX < size.x - padding) {
+            std::string s(1, c);
+            ui.drawString(position.x + currentX, textY, s, font, glm::vec4(1.0f));
+        }
+        currentX += charW;
+    }
+
 
     if (isFocused && cursorVisible) {
-        float cursorX = position.x + 6.0f;
-        for (char c : editBuffer) {
-            if (c >= 32 && c <= 126) {
-                cursorX += font.charData.data[c - 32].xadvance;
-            }
-        }
-        ui.rect(cursorX, position.y + 4.0f, 1.0f, size.y - 8.0f, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+        float cursorScreenX = position.x + padding + (cursorLocalX - scrollOffset);
+        cursorScreenX = std::clamp(cursorScreenX, position.x + padding, position.x + size.x - padding);
+        ui.rect(cursorScreenX, position.y + 4.0f, 1.0f, size.y - 8.0f, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     }
 
 }

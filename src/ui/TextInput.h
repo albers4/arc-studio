@@ -9,8 +9,15 @@ private:
     const FontAtlas& font;
     std::string editBuffer;
     std::string originalBuffer;
-    float cursorTimer = 0.0f;
+
+    int cursorPos = 0;
+    int selectionStart = -1;
+    float scrollOffset = 0.0f;
+    double lastBlinkTime = 0.0;
     bool cursorVisible = true;
+
+    bool isSelecting = false;
+    bool wasPressed = false;
 
     enum class Type { String, Int, Float } valueType = Type::String;
     void* valuePtr = nullptr;
@@ -18,6 +25,11 @@ private:
 
     void commitValue();
     void loadValueToBuffer();
+
+    void selectAll() { selectionStart = 0; cursorPos = editBuffer.length(); }
+    void clearSelection() { selectionStart = -1; }
+    std::string getSelectedText();
+    void deleteSelection();
 
 public:
     TextInput(float x, float y, float w, float h, const std::string& label, const FontAtlas& font);
@@ -30,6 +42,6 @@ public:
     void update(float mouseX, float mouseY, bool mousePressed) override;
     void draw(UIManager& ui) override;
 
-    void onKey(int key, int action, UIManager& ui) override;
+    void onKey(int key, int action, int mods, UIManager& ui) override;
     void onChar(unsigned int codepoint) override;
 };

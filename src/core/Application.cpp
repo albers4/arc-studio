@@ -84,6 +84,14 @@ void Application::initOpenGL() {
     renderer = new BatchRenderer(*uiShader);
     ui = new UIManager(*renderer);
 
+    ui->getClipboard = [this]() {
+        const char* clip = glfwGetClipboardString(window);
+        return clip ? std::string(clip) : "";
+    };
+    ui->setClipboard = [this](const std::string& text) {
+        glfwSetClipboardString(window, text.c_str());
+    };
+
     auto& myButton = ui->addWidget<Button>(20, 10, 100, 30, "Render", *font);
     myButton.onClick = []() {
         std::cout << "Render button clicked" << std::endl;
@@ -121,7 +129,7 @@ void Application::onScroll(double xoffset, double yoffset) {
 }
 
 void Application::onKey(int key, int scancode, int action, int mods) {
-    if (ui) ui->onKey(key, action);
+    if (ui) ui->onKey(key, action, mods);
 }
 
 void Application::onChar(unsigned int codepoint) {
