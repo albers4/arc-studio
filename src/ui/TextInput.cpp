@@ -117,6 +117,10 @@ void TextInput::update(float mouseX, float mouseY, bool mousePressed,
                        UIManager &ui) {
   Widget::update(mouseX, mouseY, mousePressed, ui);
 
+  if (hovered) {
+    ui.desiredCursor = CursorType::IBeam;
+  }
+
   bool justPressed = mousePressed && !wasPressed;
   wasPressed = mousePressed;
 

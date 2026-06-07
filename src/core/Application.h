@@ -31,6 +31,12 @@ private:
   GLFWwindow *window = nullptr;
   int width, height;
 
+  GLFWcursor *cursorArrow = nullptr;
+  GLFWcursor *cursorResizeNS = nullptr;
+  GLFWcursor *cursorResizeEW = nullptr;
+  GLFWcursor *cursorIBeam = nullptr;
+  GLFWcursor *cursorHand = nullptr;
+
   float mouseX = 0.0f;
   float mouseY = 0.0f;
   bool mousePressed = false;

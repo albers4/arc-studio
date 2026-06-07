@@ -32,6 +32,12 @@ void Split::update(float mouseX, float mouseY, bool mousePressed,
                                   mouseX <= splitPos + splitterSize / 2 &&
                                   mouseY >= handleStart && mouseY <= handleEnd);
 
+  if (mouseOverSplitter) {
+    ui.desiredCursor = (direction == Direction::Vertical)
+                           ? CursorType::ResizeNS
+                           : CursorType::ResizeEW;
+  }
+
   if (justPressed && mouseOverSplitter) {
     isDragging = true;
   }

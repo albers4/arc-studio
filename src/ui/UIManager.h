@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+enum class CursorType { Arrow, ResizeNS, ResizeEW, IBeam, Hand };
+
 class UIManager {
 private:
   BatchRenderer &renderer;
@@ -23,6 +25,7 @@ public:
   UIManager(BatchRenderer &ren);
 
   float windowHeight = 0.0f;
+  CursorType desiredCursor = CursorType::Arrow;
 
   std::function<std::string()> getClipboard;
   std::function<void(const std::string &)> setClipboard;

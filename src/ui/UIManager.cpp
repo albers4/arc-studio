@@ -31,6 +31,8 @@ void UIManager::updateMouse(float x, float y, bool pressed, bool justPressed) {
   mouseY = y;
   mousePressed = pressed;
 
+  desiredCursor = CursorType::Arrow;
+
   if (justPressed) {
     focusRequested = false;
   }

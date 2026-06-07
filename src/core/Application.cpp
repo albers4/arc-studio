@@ -76,6 +76,17 @@ Application::~Application() {
   delete font;
   delete uiShader;
 
+  if (cursorArrow)
+    glfwDestroyCursor(cursorArrow);
+  if (cursorResizeNS)
+    glfwDestroyCursor(cursorResizeNS);
+  if (cursorResizeEW)
+    glfwDestroyCursor(cursorResizeEW);
+  if (cursorIBeam)
+    glfwDestroyCursor(cursorIBeam);
+  if (cursorHand)
+    glfwDestroyCursor(cursorHand);
+
   if (window) {
     glfwDestroyWindow(window);
   }
@@ -85,6 +96,12 @@ Application::~Application() {
 void Application::initOpenGL() {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  cursorArrow = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+  cursorResizeNS = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
+  cursorResizeEW = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
+  cursorIBeam = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
+  cursorHand = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
 
   float targetFontSize = 16;
   float atlasFontSize = targetFontSize * 2.0f;
@@ -222,6 +239,28 @@ void Application::update() {
   if (rootSplit) {
     rootSplit->update(mouseX, mouseY, mousePressed, *ui);
   }
+
+  GLFWcursor *targetCursor = cursorArrow;
+  if (ui) {
+    switch (ui->desiredCursor) {
+    case CursorType::ResizeNS:
+      targetCursor = cursorResizeNS;
+      break;
+    case CursorType::ResizeEW:
+      targetCursor = cursorResizeEW;
+      break;
+    case CursorType::IBeam:
+      targetCursor = cursorIBeam;
+      break;
+    case CursorType::Hand:
+      targetCursor = cursorHand;
+      break;
+    default:
+      targetCursor = cursorArrow;
+      break;
+    }
+  }
+  glfwSetCursor(window, targetCursor);
 
   if (ui) {
     ui->finalizeFocus();
