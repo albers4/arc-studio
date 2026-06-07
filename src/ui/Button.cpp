@@ -2,6 +2,7 @@
 #include "FontAtlas.h"
 #include "Theme.h"
 #include "UIManager.h"
+#include <iostream>
 
 Button::Button(float x, float y, float w, float h, const std::string &label,
                const FontAtlas &font, glm::vec4 color, glm::vec4 hoverColor)
@@ -15,8 +16,9 @@ Button::Button(float x, float y, float w, float h, const std::string &label,
   }
 }
 
-void Button::update(float mouseX, float mouseY, bool mousePressed) {
-  hovered = contains(mouseX, mouseY);
+void Button::update(float mouseX, float mouseY, bool mousePressed,
+                    UIManager &ui) {
+  Widget::update(mouseX, mouseY, mousePressed, ui);
 
   bool justPressed = mousePressed && !wasPressed;
 

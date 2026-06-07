@@ -113,11 +113,16 @@ void TextInput::setFocused(bool focused) {
   }
 }
 
-void TextInput::update(float mouseX, float mouseY, bool mousePressed) {
-  Widget::update(mouseX, mouseY, mousePressed);
+void TextInput::update(float mouseX, float mouseY, bool mousePressed,
+                       UIManager &ui) {
+  Widget::update(mouseX, mouseY, mousePressed, ui);
 
   bool justPressed = mousePressed && !wasPressed;
   wasPressed = mousePressed;
+
+  if (justPressed && hovered) {
+    ui.requestFocus(this);
+  }
 
   double currentTime = glfwGetTime();
   if (isFocused) {
@@ -127,7 +132,6 @@ void TextInput::update(float mouseX, float mouseY, bool mousePressed) {
     }
 
     int newPos = cursorPos;
-    // if ((hovered || isSelecting) && (mousePressed || justPressed)) {
     if (hovered || isSelecting) {
       float padding = 6.0f;
       float localMouseX = mouseX - position.x - padding + scrollOffset;
@@ -212,6 +216,12 @@ void TextInput::onKey(int key, int action, int mods, UIManager &ui) {
       cursorPos += clip.length();
       return;
     }
+    if (key == GLFW_KEY_LEFT) {
+      cursorPos = 0;
+    }
+    if (key == GLFW_KEY_RIGHT) {
+      cursorPos = editBuffer.length() - 1;
+    }
   }
 
   // --- navigation ---
@@ -268,7 +278,7 @@ void TextInput::onKey(int key, int action, int mods, UIManager &ui) {
       deleteSelection();
     } else if (ctrl) {
       editBuffer.erase(cursorPos);
-    } else if (cursorPos > 0) {
+    } else if (cursorPos < (int)editBuffer.length()) {
       editBuffer.erase(cursorPos, 1);
     }
     return;
@@ -310,11 +320,20 @@ void TextInput::draw(UIManager &ui) {
   const auto &c = theme.colors;
 
   // background
-  glm::vec4 bgColor = isFocused ? c.surface : c.background;
+  glm::vec4 bgColor = c.background;
+  if (isFocused)
+    bgColor = c.surface;
+  else if (hovered)
+    bgColor = c.surfaceHover;
   ui.rect(position.x, position.y, size.x, size.y, bgColor);
 
   // border
-  glm::vec4 borderColor = isFocused ? c.accent : c.border;
+  glm::vec4 borderColor = c.border;
+  if (isFocused)
+    borderColor = c.accent;
+  else if (hovered)
+    borderColor = c.surfaceHover;
+
   ui.rect(position.x, position.y, size.x, m.borderWidth, borderColor); // top
   ui.rect(position.x, position.y + size.y - m.borderWidth, size.x,
           m.borderWidth, borderColor);                                 // bottom
@@ -332,7 +351,7 @@ void TextInput::draw(UIManager &ui) {
       cursorLocalX += font.charData.data[editBuffer[i] - 32].xadvance;
   }
 
-  if (cursorLocalX - scrollOffset > visible) {
+  if (cursorLocalX - scrollOffset > visibleWidth) {
     scrollOffset = cursorLocalX - visibleWidth;
   }
   if (cursorLocalX - scrollOffset < 0) {
@@ -375,14 +394,14 @@ void TextInput::draw(UIManager &ui) {
 
   // text drawing
   float currentX = padding - scrollOffset;
-  for (char c : editBuffer) {
-    if (c < 32 || c > 126)
+  for (char c_char : editBuffer) {
+    if (c_char < 32 || c_char > 126)
       continue;
-    float charW = font.charData.data[c - 32].xadvance;
+    float charW = font.charData.data[c_char - 32].xadvance;
 
     if (currentX + charW > padding && currentX < size.x - padding) {
-      std::string s(1, c);
-      ui.drawString(position.x + currentX, textY, s, font, glm::vec4(1.0f));
+      std::string s(1, c_char);
+      ui.drawString(position.x + currentX, textY, s, font, c.text);
     }
     currentX += charW;
   }

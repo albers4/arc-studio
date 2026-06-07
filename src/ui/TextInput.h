@@ -43,7 +43,8 @@ public:
   void bind(float &value, float min, float max);
 
   void setFocused(bool focused) override;
-  void update(float mouseX, float mouseY, bool mousePressed) override;
+  void update(float mouseX, float mouseY, bool mousePressed,
+              UIManager &ui) override;
   void draw(UIManager &ui) override;
 
   void onKey(int key, int action, int mods, UIManager &ui) override;

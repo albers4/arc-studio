@@ -16,7 +16,10 @@ Slider::Slider(float x, float y, float w, float h, const std::string &label,
   value = glm::clamp(value, 0.0f, 1.0f);
 }
 
-void Slider::update(float mouseX, float mouseY, bool mousePressed) {
+void Slider::update(float mouseX, float mouseY, bool mousePressed,
+                    UIManager &ui) {
+  Widget::update(mouseX, mouseY, mousePressed, ui);
+
   float knobSize = 12.0f;
   float trackWidth = size.x - knobSize;
 
@@ -49,7 +52,6 @@ void Slider::update(float mouseX, float mouseY, bool mousePressed) {
   }
 
   wasPressed = mousePressed;
-  hovered = contains(mouseX, mouseY);
 }
 
 void Slider::draw(UIManager &ui) {

@@ -18,6 +18,7 @@ public:
   Button(float x, float y, float w, float h, const std::string &label,
          const FontAtlas &font, glm::vec4 color = glm::vec4(0.5f),
          glm::vec4 hoverColor = glm::vec4(0.7f));
-  void update(float mouseX, float mouseY, bool mousePressed) override;
+  void update(float mouseX, float mouseY, bool mousePressed,
+              UIManager &ui) override;
   void draw(UIManager &ui) override;
 };

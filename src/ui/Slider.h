@@ -22,7 +22,8 @@ public:
          const FontAtlas &font, float min = 0.0f, float max = 1.0f,
          float startValue = 0.5f);
 
-  void update(float mouseX, float mouseY, bool mousePressed) override;
+  void update(float mouseX, float mouseY, bool mousePressed,
+              UIManager &ui) override;
   void draw(UIManager &ui) override;
   void onScroll(float delta) override;
 

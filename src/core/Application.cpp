@@ -1,9 +1,11 @@
 #include "Application.h"
 #include "../renderer/BatchRenderer.h"
 #include "../renderer/Shader.h"
+#include "../ui/Area.h"
 #include "../ui/Button.h"
 #include "../ui/FontAtlas.h"
 #include "../ui/Slider.h"
+#include "../ui/Split.h"
 #include "../ui/TextInput.h"
 #include "../ui/Theme.h"
 #include "../ui/UIManager.h"
@@ -79,7 +81,6 @@ void Application::initOpenGL() {
   // Initialize Resources
   uiShader = new Shader("../shaders/ui.vert", "../shaders/ui.frag");
   font = new FontAtlas("../assets/fonts/arial.ttf", 16.0f);
-  const auto &theme = Theme::get();
 
   if (font->textureID == 0) {
     std::cerr << "Failed to load font!" << std::endl;
@@ -97,6 +98,30 @@ void Application::initOpenGL() {
     glfwSetClipboardString(window, text.c_str());
   };
 
+  // --- dynamic layout setup ---
+
+  rootSplit = std::make_unique<Split>(0, 0, 1200, 800,
+                                      Split::Direction::Vertical, 0.75f);
+
+  auto &viewport = rootSplit->addChild<Area>(0, 0, 0, 0, Area::Type::Viewport3D,
+                                             "Viewport", *font);
+  auto &properties = rootSplit->addChild<Area>(
+      0, 0, 0, 0, Area::Type::Properties, "Properties", *font);
+
+  auto &myButton1 = viewport.addChild<Button>(20, 10, 100, 30, "Render", *font);
+
+  auto &mySlider = properties.addChild<Slider>(20, 60, 200, 30, "Brush Slider",
+                                               *font, 0.0f, 100.0f, 50.0f);
+  mySlider.onClick = [&]() {
+    std::cout << "Slider value: " << mySlider.getValue() << std::endl;
+  };
+
+  static std::string myName = "ArcStudio";
+  auto &nameInput =
+      viewport.addChild<TextInput>(20, 110, 200, 30, "Name", *font);
+  nameInput.bind(myName);
+
+  /*
   auto &myButton = ui->addWidget<Button>(20, 10, 100, 30, "Render", *font);
   myButton.onClick = []() {
     std::cout << "Render button clicked" << std::endl;
@@ -118,9 +143,9 @@ void Application::initOpenGL() {
   sizeInput.bind(brushSize, 1, 100);
 
   static float exposure = 1.0f;
-  auto &expInput =
-      ui->addWidget<TextInput>(20, 200, 200, 30, "Exposure", *font);
-  expInput.bind(exposure, 0.0f, 1.0f);
+  auto &expInput = viewport.addChild<TextInput>(20, 20, 200, 30, "Exposure",
+  *font); expInput.bind(exposure, 0.0f, 1.0f);
+  */
 }
 
 void Application::run() {
@@ -153,11 +178,22 @@ void Application::update() {
   bool leftClick =
       glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
 
-  static bool wasPressed = false;
-  bool justPressed = leftClick && !wasPressed;
+  mouseJustPressed = leftClick && !mousePressed;
+  mousePressed = leftClick;
+  mouseX = static_cast<float>(mx);
+  mouseY = static_cast<float>(my);
 
-  ui->updateMouse(mx, my, leftClick, justPressed);
-  wasPressed = leftClick;
+  if (ui) {
+    ui->updateMouse(mouseX, mouseY, mousePressed, mouseJustPressed);
+  }
+
+  if (rootSplit) {
+    rootSplit->update(mouseX, mouseY, mousePressed, *ui);
+  }
+
+  if (ui) {
+    ui->finalizeFocus();
+  }
 }
 
 void Application::render() {
@@ -168,9 +204,18 @@ void Application::render() {
   glClear(GL_COLOR_BUFFER_BIT);
 
   glm::mat4 proj = glm::ortho(0.0f, (float)w, (float)h, 0.0f, -1.0f, 1.0f);
+  if (ui) {
+    ui->windowHeight = (float)h;
+    ui->prepareForFrame(proj, *font);
+  }
 
-  // --- UI Drawing Code ---
-  // ui->rect(0, 0, w, 50, glm::vec4(0.3f, 0.3f, 0.35f, 1.0f)); // Header
+  if (rootSplit) {
+    rootSplit->position = {0.0f, 0.0f};
+    rootSplit->size = {(float)w, (float)h};
+    rootSplit->draw(*ui);
+  }
 
-  ui->flush(proj, *font);
+  if (ui) {
+    ui->flush();
+  }
 }

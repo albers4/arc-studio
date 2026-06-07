@@ -3,25 +3,40 @@
 UIManager::UIManager(BatchRenderer &ren)
     : renderer(ren), focusedWidget(nullptr) {}
 
+void UIManager::prepareForFrame(const glm::mat4 &proj, const FontAtlas &font) {
+  currentProj = proj;
+  currentFont = &font;
+}
+
+void UIManager::flush() {
+  if (currentFont) {
+    renderer.flush(currentProj, currentFont->textureID);
+  }
+}
+
+void UIManager::beginClip(float x, float y, float w, float h) {
+  flush();
+  glEnable(GL_SCISSOR_TEST);
+  float glY = windowHeight - (y + h);
+  glScissor((int)x, (int)glY, (int)w, (int)h);
+}
+
+void UIManager::endClip() {
+  flush();
+  glDisable(GL_SCISSOR_TEST);
+}
+
 void UIManager::updateMouse(float x, float y, bool pressed, bool justPressed) {
   mouseX = x;
   mouseY = y;
   mousePressed = pressed;
 
   if (justPressed) {
-    focusedWidget = nullptr;
-
-    for (auto it = widgets.rbegin(); it != widgets.rend(); ++it) {
-      if ((*it)->contains(mouseX, mouseY)) {
-        focusedWidget = it->get();
-        break;
-      }
-    }
+    focusRequested = false;
   }
 
   for (auto &widget : widgets) {
-    widget->setFocused(widget.get() == focusedWidget);
-    widget->update(mouseX, mouseY, mousePressed);
+    widget->update(mouseX, mouseY, mousePressed, *this);
   }
 }
 
@@ -34,6 +49,25 @@ void UIManager::onKey(int key, int action, int mods) {
 void UIManager::onChar(unsigned int codepoint) {
   if (focusedWidget) {
     focusedWidget->onChar(codepoint);
+  }
+}
+
+void UIManager::requestFocus(Widget *w) {
+  if (focusedWidget != w) {
+    if (focusedWidget)
+      focusedWidget->setFocused(false);
+    focusedWidget = w;
+    if (focusedWidget)
+      focusedWidget->setFocused(true);
+  }
+  focusRequested = true;
+}
+
+void UIManager::finalizeFocus() {
+  if (!focusRequested && focusedWidget != nullptr) {
+    if (focusedWidget)
+      focusedWidget->setFocused(false);
+    focusedWidget = nullptr;
   }
 }
 
@@ -76,14 +110,4 @@ void UIManager::drawString(float x, float y, const std::string &text,
     renderer.textQuad(cx + ch.xoff, y + ch.yoff, w, h, u0, v0, u1, v1, color);
     cx += ch.xadvance;
   }
-}
-
-void UIManager::flush(const glm::mat4 &proj, const FontAtlas &font) {
-  for (auto &widget : widgets) {
-    if (widget->visible) {
-      widget->draw(*this);
-    }
-  }
-
-  renderer.flush(proj, font.textureID);
 }

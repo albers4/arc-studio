@@ -19,7 +19,8 @@ public:
   Widget(float x, float y, float w, float h, const std::string &label);
   virtual ~Widget() = default;
 
-  virtual void update(float mouseX, float mouseY, bool mousePressed);
+  virtual void update(float mouseX, float mouseY, bool mousePressed,
+                      UIManager &ui);
   virtual void draw(UIManager &ui) = 0; // pure virtual
   virtual void setFocused(bool focused);
 

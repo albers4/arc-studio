@@ -4,7 +4,8 @@
 Widget::Widget(float x, float y, float w, float h, const std::string &label)
     : position(x, y), size(w, h), label(label) {}
 
-void Widget::update(float mouseX, float mouseY, bool mousePressed) {
+void Widget::update(float mouseX, float mouseY, bool mousePressed,
+                    UIManager &ui) {
   hovered = contains(mouseX, mouseY);
 }
 

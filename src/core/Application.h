@@ -1,7 +1,9 @@
 #pragma once
 #include <glad/glad.h>
 
+#include "../ui/Split.h"
 #include <GLFW/glfw3.h>
+#include <memory>
 #include <string>
 
 class UIManager;
@@ -28,10 +30,16 @@ private:
   GLFWwindow *window = nullptr;
   int width, height;
 
+  float mouseX = 0.0f;
+  float mouseY = 0.0f;
+  bool mousePressed = false;
+  bool mouseJustPressed = false;
+
   Shader *uiShader = nullptr;
   FontAtlas *font = nullptr;
   BatchRenderer *renderer = nullptr;
   UIManager *ui = nullptr;
+  std::unique_ptr<Split> rootSplit = nullptr;
 
   void initOpenGL();
   void update();
