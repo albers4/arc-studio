@@ -59,12 +59,13 @@ Application::Application(const std::string &title, int w, int h)
       app->onChar(codepoint);
   });
 
-  glfwSetFramebufferSizeCallback(window, [](GLFWwindow* w, int width, int height) {
-    auto* app = static_cast<Application*>(glfwGetWindowUserPointer(w));
-    if (app) {
-      app->onFramebufferResize(width, height);
-    }
-  });
+  glfwSetFramebufferSizeCallback(
+      window, [](GLFWwindow *w, int width, int height) {
+        auto *app = static_cast<Application *>(glfwGetWindowUserPointer(w));
+        if (app) {
+          app->onFramebufferResize(width, height);
+        }
+      });
 
   initOpenGL();
 }

@@ -1,6 +1,7 @@
 #include "Area.h"
 #include "Theme.h"
 #include "UIManager.h"
+#include <algorithm>
 #include <iostream>
 
 Area::Area(float x, float y, float w, float h, Type type,
@@ -29,9 +30,20 @@ void Area::update(float mouseX, float mouseY, bool mousePressed,
                   UIManager &ui) {
   Widget::update(mouseX, mouseY, mousePressed, ui);
 
+  float contentX = position.x;
+  float contentY = position.y + getHeaderHeight();
+  float contentW = size.x;
+  float contentH = std::max(0.0f, size.y - getHeaderHeight());
+
+  bool mouseInContent = (mouseX >= contentX && mouseX <= contentX + contentW &&
+                         mouseY >= contentY && mouseY <= contentY + contentH);
+
+  float effMouseX = mouseInContent ? mouseX : -10000.0f;
+  float effMouseY = mouseInContent ? mouseY : -10000.0f;
+
   applyOffset();
   for (auto &child : children) {
-    child->update(mouseX, mouseY, mousePressed, ui);
+    child->update(effMouseX, effMouseY, mousePressed, ui);
   }
   revertOffset();
 }
