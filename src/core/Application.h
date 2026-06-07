@@ -25,6 +25,7 @@ public:
   void onScroll(double xoffset, double yoffset);
   void onKey(int key, int scancode, int action, int mods);
   void onChar(unsigned int codepoint);
+  void onFramebufferResize(int width, int height);
 
 private:
   GLFWwindow *window = nullptr;
