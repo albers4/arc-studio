@@ -11,6 +11,9 @@ void Split::update(float mouseX, float mouseY, bool mousePressed,
                    UIManager &ui) {
   Widget::update(mouseX, mouseY, mousePressed, ui);
 
+  bool justPressed = mousePressed && !wasPressed;
+  wasPressed = mousePressed;
+
   float splitterSize = 6.0f;
   float splitPos = (direction == Direction::Vertical)
                        ? position.y + (size.y * ratio)
@@ -29,7 +32,7 @@ void Split::update(float mouseX, float mouseY, bool mousePressed,
                                   mouseX <= splitPos + splitterSize / 2 &&
                                   mouseY >= handleStart && mouseY <= handleEnd);
 
-  if (mouseOverSplitter && mousePressed) {
+  if (justPressed && mouseOverSplitter) {
     isDragging = true;
   }
 

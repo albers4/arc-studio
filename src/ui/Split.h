@@ -29,5 +29,6 @@ private:
   Direction direction;
   float ratio;
   bool isDragging = false;
+  bool wasPressed = false;
   std::vector<std::unique_ptr<Widget>> children;
 };
