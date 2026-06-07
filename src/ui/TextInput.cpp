@@ -348,7 +348,8 @@ void TextInput::draw(UIManager &ui) {
   float cursorLocalX = 0;
   for (int i = 0; i < cursorPos; i++) {
     if (editBuffer[i] >= 32 && editBuffer[i] <= 126)
-      cursorLocalX += font.charData.data[editBuffer[i] - 32].xadvance * font.scale;
+      cursorLocalX +=
+          font.charData.data[editBuffer[i] - 32].xadvance * font.scale;
   }
 
   if (cursorLocalX - scrollOffset > visibleWidth) {

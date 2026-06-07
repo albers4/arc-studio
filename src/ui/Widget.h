@@ -25,6 +25,7 @@ public:
   virtual void setFocused(bool focused);
 
   virtual void onScroll(float delta);
+  virtual void cascadeScroll(float delta);
   virtual void onKey(int key, int action, int mods, UIManager &ui) {}
   virtual void onChar(unsigned int codepoint) {}
 

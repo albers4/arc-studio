@@ -17,3 +17,5 @@ bool Widget::contains(float mx, float my) const {
   return mx >= position.x && mx <= position.x + size.x && my >= position.y &&
          my <= position.y + size.y;
 }
+
+void Widget::cascadeScroll(float delta) { onScroll(delta); }

@@ -7,7 +7,14 @@
 
 class Area : public Widget {
 public:
-  enum class Type { Viewport3D, Outliner, Graph, Properties, Console, Timeline };
+  enum class Type {
+    Viewport3D,
+    Outliner,
+    Graph,
+    Properties,
+    Console,
+    Timeline
+  };
 
   Type areaType;
   const FontAtlas &font;
@@ -29,8 +36,19 @@ public:
               UIManager &ui) override;
   void draw(UIManager &ui) override;
 
+  void cascadeScroll(float delta) override;
+  void onScroll(float delta) override;
+
 private:
   std::vector<std::unique_ptr<Widget>> children;
+  float scrollY = 0.0f;
+  float totalContentHeight = 0.0f;
+  float scrollbarWidth = 10.0f;
+  bool isDraggingScollbar = false;
+  bool wasPressed = false;
+
+  void calculateContentHeight();
+  float getVisibleContentHeight() const;
 
   void applyOffset();
   void revertOffset();

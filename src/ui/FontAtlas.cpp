@@ -11,8 +11,8 @@ FontAtlas::~FontAtlas() {
     glDeleteTextures(1, &textureID);
 }
 
-FontAtlas::FontAtlas(const std::string &filename, float targetSize, float atlasSize, int width,
-                     int height)
+FontAtlas::FontAtlas(const std::string &filename, float targetSize,
+                     float atlasSize, int width, int height)
     : atlasW(width), atlasH(height) {
   std::vector<unsigned char> bitmap(atlasW * atlasH, 0);
 
@@ -32,8 +32,8 @@ FontAtlas::FontAtlas(const std::string &filename, float targetSize, float atlasS
     return;
   }
 
-  stbtt_BakeFontBitmap(buffer.data(), 0, atlasSize, bitmap.data(), atlasW, atlasH,
-                       32, 96, charData.data);
+  stbtt_BakeFontBitmap(buffer.data(), 0, atlasSize, bitmap.data(), atlasW,
+                       atlasH, 32, 96, charData.data);
 
   scale = targetSize / atlasSize;
 

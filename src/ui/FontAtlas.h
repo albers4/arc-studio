@@ -16,8 +16,8 @@ public:
   float scale = 1.0f;
 
   FontAtlas() = default;
-  FontAtlas(const std::string &filename, float targetSize, float atlasSize, int width = 2048,
-            int height = 2048);
+  FontAtlas(const std::string &filename, float targetSize, float atlasSize,
+            int width = 2048, int height = 2048);
   ~FontAtlas();
 
   FontAtlas(const FontAtlas &) = delete;

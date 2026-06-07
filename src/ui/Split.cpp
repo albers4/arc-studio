@@ -94,3 +94,10 @@ void Split::draw(UIManager &ui) {
     }
   }
 }
+
+void Split::cascadeScroll(float delta) {
+  onScroll(delta);
+  for (auto &child : children) {
+    child->cascadeScroll(delta);
+  }
+}

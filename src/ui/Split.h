@@ -19,6 +19,8 @@ public:
     return *ptr;
   }
 
+  void cascadeScroll(float delta) override;
+
   void update(float mouseX, float mouseY, bool mousePressed,
               UIManager &ui) override;
   void draw(UIManager &ui) override;

@@ -91,8 +91,10 @@ void Application::initOpenGL() {
 
   // Initialize Resources
   uiShader = new Shader("../shaders/ui.vert", "../shaders/ui.frag");
-  //font = new FontAtlas("../assets/fonts/Inter/Inter-Regular.ttf", atlasFontSize);
-  font = new FontAtlas("../assets/fonts/geist-font/Geist/ttf/Geist-Regular.ttf", targetFontSize, atlasFontSize);
+  // font = new FontAtlas("../assets/fonts/Inter/Inter-Regular.ttf",
+  // atlasFontSize);
+  font = new FontAtlas("../assets/fonts/geist-font/Geist/ttf/Geist-Regular.ttf",
+                       targetFontSize, atlasFontSize);
 
   if (font->textureID == 0) {
     std::cerr << "Failed to load font!" << std::endl;
@@ -115,12 +117,15 @@ void Application::initOpenGL() {
   rootSplit = std::make_unique<Split>(0, 0, 1200, 800,
                                       Split::Direction::Vertical, 0.75f);
 
-  auto &viewport3d = rootSplit->addChild<Area>(0, 0, 0, 0, Area::Type::Viewport3D,
-                                             "File", *font);
+  auto &viewport3d = rootSplit->addChild<Area>(
+      0, 0, 0, 0, Area::Type::Viewport3D, "File", *font);
   auto &properties = rootSplit->addChild<Area>(
       0, 0, 0, 0, Area::Type::Properties, "Properties", *font);
 
-  auto &myButton1 = viewport3d.addChild<Button>(20, 10, 100, 30, "Render", *font);
+  auto &myButton1 =
+      viewport3d.addChild<Button>(20, 10, 100, 30, "Render", *font);
+  auto &myButton2 =
+      viewport3d.addChild<Button>(20, 200, 100, 30, "Render", *font);
 
   auto &mySlider = properties.addChild<Slider>(20, 60, 200, 30, "Brush Slider",
                                                *font, 0.0f, 100.0f, 50.0f);
@@ -170,8 +175,12 @@ void Application::run() {
 }
 
 void Application::onScroll(double xoffset, double yoffset) {
-  if (ui)
+  if (rootSplit) {
+    rootSplit->cascadeScroll(static_cast<float>(yoffset));
+  }
+  if (ui) {
     ui->updateScroll(yoffset);
+  }
 }
 
 void Application::onKey(int key, int scancode, int action, int mods) {
