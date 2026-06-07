@@ -86,9 +86,13 @@ void Application::initOpenGL() {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+  float targetFontSize = 16;
+  float atlasFontSize = targetFontSize * 2.0f;
+
   // Initialize Resources
   uiShader = new Shader("../shaders/ui.vert", "../shaders/ui.frag");
-  font = new FontAtlas("../assets/fonts/arial.ttf", 16.0f);
+  //font = new FontAtlas("../assets/fonts/Inter/Inter-Regular.ttf", atlasFontSize);
+  font = new FontAtlas("../assets/fonts/geist-font/Geist/ttf/Geist-Regular.ttf", targetFontSize, atlasFontSize);
 
   if (font->textureID == 0) {
     std::cerr << "Failed to load font!" << std::endl;
@@ -112,7 +116,7 @@ void Application::initOpenGL() {
                                       Split::Direction::Vertical, 0.75f);
 
   auto &viewport3d = rootSplit->addChild<Area>(0, 0, 0, 0, Area::Type::Viewport3D,
-                                             "Viewport", *font);
+                                             "File", *font);
   auto &properties = rootSplit->addChild<Area>(
       0, 0, 0, 0, Area::Type::Properties, "Properties", *font);
 

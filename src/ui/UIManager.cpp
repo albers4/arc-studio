@@ -99,8 +99,8 @@ void UIManager::drawString(float x, float y, const std::string &text,
     if (c < 32 || c > 126)
       continue;
     const stbtt_bakedchar &ch = font.charData.data[c - 32];
-    float w = ch.x1 - ch.x0;
-    float h = ch.y1 - ch.y0;
+    float w = (ch.x1 - ch.x0) * font.scale;
+    float h = (ch.y1 - ch.y0) * font.scale;
     if (w <= 0 || h <= 0)
       continue;
 
@@ -109,10 +109,10 @@ void UIManager::drawString(float x, float y, const std::string &text,
     float u1 = (float)ch.x1 / (float)font.atlasW;
     float v1 = (float)ch.y1 / (float)font.atlasH;
 
-    float charX = cx + std::round(ch.xoff);
-    float charY = cy + std::round(ch.yoff);
+    float charX = cx + std::round(ch.xoff * font.scale);
+    float charY = cy + std::round(ch.yoff * font.scale);
 
     renderer.textQuad(charX, charY, w, h, u0, v0, u1, v1, color);
-    cx += ch.xadvance;
+    cx += ch.xadvance * font.scale;
   }
 }

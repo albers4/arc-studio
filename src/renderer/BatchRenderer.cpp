@@ -18,6 +18,9 @@ BatchRenderer::BatchRenderer(Shader &sh) : shader(sh) {
                         (void *)offsetof(Vertex, col));
   glEnableVertexAttribArray(2);
   glBindVertexArray(0);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 BatchRenderer::~BatchRenderer() {

@@ -11,7 +11,7 @@ FontAtlas::~FontAtlas() {
     glDeleteTextures(1, &textureID);
 }
 
-FontAtlas::FontAtlas(const std::string &filename, float pxSize, int width,
+FontAtlas::FontAtlas(const std::string &filename, float targetSize, float atlasSize, int width,
                      int height)
     : atlasW(width), atlasH(height) {
   std::vector<unsigned char> bitmap(atlasW * atlasH, 0);
@@ -32,19 +32,20 @@ FontAtlas::FontAtlas(const std::string &filename, float pxSize, int width,
     return;
   }
 
-  stbtt_BakeFontBitmap(buffer.data(), 0, pxSize, bitmap.data(), atlasW, atlasH,
+  stbtt_BakeFontBitmap(buffer.data(), 0, atlasSize, bitmap.data(), atlasW, atlasH,
                        32, 96, charData.data);
+
+  scale = targetSize / atlasSize;
 
   stbtt_fontinfo info;
   if (stbtt_InitFont(&info, buffer.data(), 0)) {
-    int asc, desc, lgap;
-    stbtt_GetFontVMetrics(&info, &asc, &desc, &lgap);
+    int ascent, descent, lineGap;
+    stbtt_GetFontVMetrics(&info, &ascent, &descent, &lineGap);
 
-    scale = stbtt_ScaleForPixelHeight(&info, pxSize);
-    ascent = asc * scale;
-    descent = desc * scale;
-    lineGap = lgap * scale;
-    baselineOffset = (ascent + descent) / 2.0f;
+    float tempScale = stbtt_ScaleForPixelHeight(&info, atlasSize);
+    baselineOffset = (ascent + descent) / 2.0f * tempScale;
+
+    baselineOffset *= scale;
   }
 
   glGenTextures(1, &textureID);

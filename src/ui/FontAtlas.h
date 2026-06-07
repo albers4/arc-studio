@@ -13,13 +13,10 @@ public:
   StbttCharData charData;
   int atlasW = 0, atlasH = 0;
   float baselineOffset = 0.0f;
-  float ascent = 0.0f;
-  float descent = 0.0f;
-  float lineGap = 0.0f;
   float scale = 1.0f;
 
   FontAtlas() = default;
-  FontAtlas(const std::string &filename, float pxSize, int width = 2048,
+  FontAtlas(const std::string &filename, float targetSize, float atlasSize, int width = 2048,
             int height = 2048);
   ~FontAtlas();
 

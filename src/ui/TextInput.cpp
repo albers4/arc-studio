@@ -141,7 +141,7 @@ void TextInput::update(float mouseX, float mouseY, bool mousePressed,
       for (char c : editBuffer) {
         if (c < 32 || c > 126)
           continue;
-        float charW = font.charData.data[c - 32].xadvance;
+        float charW = font.charData.data[c - 32].xadvance * font.scale;
         if (localMouseX > currentX + charW / 2.0f) {
           newPos++;
           currentX += charW;
@@ -348,7 +348,7 @@ void TextInput::draw(UIManager &ui) {
   float cursorLocalX = 0;
   for (int i = 0; i < cursorPos; i++) {
     if (editBuffer[i] >= 32 && editBuffer[i] <= 126)
-      cursorLocalX += font.charData.data[editBuffer[i] - 32].xadvance;
+      cursorLocalX += font.charData.data[editBuffer[i] - 32].xadvance * font.scale;
   }
 
   if (cursorLocalX - scrollOffset > visibleWidth) {
@@ -361,7 +361,7 @@ void TextInput::draw(UIManager &ui) {
   float totalTextWidth = 0;
   for (char c : editBuffer)
     if (c >= 32 && c <= 126)
-      totalTextWidth += font.charData.data[c - 32].xadvance;
+      totalTextWidth += font.charData.data[c - 32].xadvance * font.scale;
   float maxScroll = std::max(0.0f, totalTextWidth - visibleWidth);
   scrollOffset = std::clamp(scrollOffset, 0.0f, maxScroll);
 
@@ -371,11 +371,11 @@ void TextInput::draw(UIManager &ui) {
 
     float startX = padding - scrollOffset;
     for (int i = 0; i < startIndex; i++)
-      startX += font.charData.data[editBuffer[i] - 32].xadvance;
+      startX += font.charData.data[editBuffer[i] - 32].xadvance * font.scale;
 
     float endX = startX;
     for (int i = startIndex; i < endIndex; i++)
-      endX += font.charData.data[editBuffer[i] - 32].xadvance;
+      endX += font.charData.data[editBuffer[i] - 32].xadvance * font.scale;
 
     float screenStartX = position.x + startX;
     float screenEndX = position.x + endX;
@@ -397,7 +397,7 @@ void TextInput::draw(UIManager &ui) {
   for (char c_char : editBuffer) {
     if (c_char < 32 || c_char > 126)
       continue;
-    float charW = font.charData.data[c_char - 32].xadvance;
+    float charW = font.charData.data[c_char - 32].xadvance * font.scale;
 
     if (currentX + charW > padding && currentX < size.x - padding) {
       std::string s(1, c_char);

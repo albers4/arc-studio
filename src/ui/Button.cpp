@@ -11,7 +11,7 @@ Button::Button(float x, float y, float w, float h, const std::string &label,
   textWidth = 0;
   for (char c : label) {
     if (c >= 32 && c <= 126) {
-      textWidth += font.charData.data[c - 32].xadvance;
+      textWidth += font.charData.data[c - 32].xadvance * font.scale;
     }
   }
 }
