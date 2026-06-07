@@ -43,29 +43,46 @@ void Area::update(float mouseX, float mouseY, bool mousePressed,
       (mouseX >= scrollbarX && mouseX <= position.x + size.x &&
        mouseY >= contentY && mouseY <= contentY + visibleH);
 
+  float maxScroll = std::max(0.0f, totalContentHeight - visibleH);
+
   if (totalContentHeight > visibleH) {
     if (justPressed && mouseOverScrollbar) {
-      isDraggingScollbar = true;
+      isDraggingScrollbar = true;
+      dragStartMouseY = mouseY;
+      dragStartScrollY = scrollY;
     }
     if (!mousePressed) {
-      isDraggingScollbar = false;
+      isDraggingScrollbar = false;
     }
 
-    if (isDraggingScollbar) {
-      float maxScroll = totalContentHeight - visibleH;
+    if (isDraggingScrollbar) {
       float handleH =
           std::max(20.f, visibleH * (visibleH / totalContentHeight));
       float scrollableTrackH = visibleH - handleH;
 
-      float relativeMouseY = mouseY - contentY;
-      float ratio = std::clamp(
-          (relativeMouseY - handleH / 2.0f) / scrollableTrackH, 0.0f, 1.0f);
-      scrollY = ratio * maxScroll;
+      float deltaY = mouseY - dragStartMouseY;
+      float scrollDelta = (deltaY / scrollableTrackH) * maxScroll;
+
+      float newScroll =
+          std::clamp(dragStartScrollY + scrollDelta, 0.0f, maxScroll);
+
+      scrollY = newScroll;
+      targetScrollY = newScroll;
+    } else {
+      scrollY += (targetScrollY - scrollY) * scrollSmoothing;
+
+      if (std::abs(targetScrollY - scrollY) < 0.1f) {
+        scrollY = targetScrollY;
+      }
     }
   } else {
     scrollY = 0.0f;
-    isDraggingScollbar = false;
+    targetScrollY = 0.0f;
+    isDraggingScrollbar = false;
   }
+
+  targetScrollY = std::clamp(targetScrollY, 0.0f, maxScroll);
+  scrollY = std::clamp(scrollY, 0.0f, maxScroll);
 
   bool mouseInContent =
       (mouseX >= position.x && mouseX <= position.x + size.x - scrollbarWidth &&
@@ -119,7 +136,7 @@ void Area::draw(UIManager &ui) {
     float handleY = contentY + (scrollY / maxScroll) * scrollableTrackH;
 
     ui.rect(scrollbarX, contentY, scrollbarWidth, visibleH, c.background);
-    glm::vec4 handleColor = isDraggingScollbar ? c.accent : c.surfaceHover;
+    glm::vec4 handleColor = isDraggingScrollbar ? c.accent : c.surfaceHover;
     ui.rect(scrollbarX + 2.0f, handleY + 2.0f, scrollbarWidth - 4.0f,
             handleH - 4.0f, handleColor);
   }
@@ -159,9 +176,10 @@ void Area::onScroll(float delta) {
   if (hovered && !childHovered) {
     float visibleH = getVisibleContentHeight();
     if (totalContentHeight > visibleH) {
-      scrollY -= delta * 20.0f;
-      float maxScroll = totalContentHeight - visibleH;
-      scrollY = std::clamp(scrollY, 0.0f, maxScroll);
+      targetScrollY -= delta * 40.0f;
+
+      float maxScroll = std::max(0.0f, totalContentHeight - visibleH);
+      targetScrollY = std::clamp(targetScrollY, 0.0f, maxScroll);
     }
   }
 }

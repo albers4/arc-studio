@@ -126,6 +126,10 @@ void Application::initOpenGL() {
       viewport3d.addChild<Button>(20, 10, 100, 30, "Render", *font);
   auto &myButton2 =
       viewport3d.addChild<Button>(20, 200, 100, 30, "Render", *font);
+  auto &myButton3 =
+      viewport3d.addChild<Button>(20, 300, 100, 30, "Render", *font);
+  auto &myButton4 =
+      viewport3d.addChild<Button>(20, 400, 100, 30, "Render", *font);
 
   auto &mySlider = properties.addChild<Slider>(20, 60, 200, 30, "Brush Slider",
                                                *font, 0.0f, 100.0f, 50.0f);

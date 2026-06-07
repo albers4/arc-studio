@@ -42,10 +42,16 @@ public:
 private:
   std::vector<std::unique_ptr<Widget>> children;
   float scrollY = 0.0f;
+  float targetScrollY = 0.0f;
+  float scrollSmoothing = 0.2f;
   float totalContentHeight = 0.0f;
   float scrollbarWidth = 10.0f;
-  bool isDraggingScollbar = false;
+
+  bool isDraggingScrollbar = false;
   bool wasPressed = false;
+
+  float dragStartMouseY = 0.0f;
+  float dragStartScrollY = 0.0f;
 
   void calculateContentHeight();
   float getVisibleContentHeight() const;
