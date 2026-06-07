@@ -62,7 +62,7 @@ void Area::draw(UIManager &ui) {
   ui.rect(position.x, position.y, size.x, headerHeight, headerColor);
   ui.rect(position.x, position.y + headerHeight - 1.0f, size.x, 1.0f, c.border);
 
-  float textY = position.y + (headerHeight / 2.0f) + font.baselineOffset;
+  float textY = std::round(position.y + (headerHeight / 2.0f) + font.baselineOffset);
   ui.drawString(position.x + m.padding, textY, label, font, c.text);
 
   ui.rect(position.x, contentY, size.x, contentH, c.background);

@@ -7,7 +7,7 @@
 
 class Area : public Widget {
 public:
-  enum class Type { Viewport3D, FileBrowser, Graph, Properties, Console };
+  enum class Type { Viewport3D, Outliner, Graph, Properties, Console, Timeline };
 
   Type areaType;
   const FontAtlas &font;

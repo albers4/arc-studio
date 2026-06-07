@@ -92,7 +92,9 @@ void UIManager::rect(float x, float y, float w, float h, glm::vec4 col) {
 
 void UIManager::drawString(float x, float y, const std::string &text,
                            const FontAtlas &font, glm::vec4 color) {
-  float cx = x;
+  float cx = std::round(x);
+  float cy = std::round(y);
+
   for (char c : text) {
     if (c < 32 || c > 126)
       continue;
@@ -107,7 +109,10 @@ void UIManager::drawString(float x, float y, const std::string &text,
     float u1 = (float)ch.x1 / (float)font.atlasW;
     float v1 = (float)ch.y1 / (float)font.atlasH;
 
-    renderer.textQuad(cx + ch.xoff, y + ch.yoff, w, h, u0, v0, u1, v1, color);
+    float charX = cx + std::round(ch.xoff);
+    float charY = cy + std::round(ch.yoff);
+
+    renderer.textQuad(charX, charY, w, h, u0, v0, u1, v1, color);
     cx += ch.xadvance;
   }
 }

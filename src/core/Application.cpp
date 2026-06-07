@@ -111,12 +111,12 @@ void Application::initOpenGL() {
   rootSplit = std::make_unique<Split>(0, 0, 1200, 800,
                                       Split::Direction::Vertical, 0.75f);
 
-  auto &viewport = rootSplit->addChild<Area>(0, 0, 0, 0, Area::Type::Viewport3D,
+  auto &viewport3d = rootSplit->addChild<Area>(0, 0, 0, 0, Area::Type::Viewport3D,
                                              "Viewport", *font);
   auto &properties = rootSplit->addChild<Area>(
       0, 0, 0, 0, Area::Type::Properties, "Properties", *font);
 
-  auto &myButton1 = viewport.addChild<Button>(20, 10, 100, 30, "Render", *font);
+  auto &myButton1 = viewport3d.addChild<Button>(20, 10, 100, 30, "Render", *font);
 
   auto &mySlider = properties.addChild<Slider>(20, 60, 200, 30, "Brush Slider",
                                                *font, 0.0f, 100.0f, 50.0f);
@@ -126,7 +126,7 @@ void Application::initOpenGL() {
 
   static std::string myName = "ArcStudio";
   auto &nameInput =
-      viewport.addChild<TextInput>(20, 110, 200, 30, "Name", *font);
+      viewport3d.addChild<TextInput>(20, 110, 200, 30, "Name", *font);
   nameInput.bind(myName);
 
   /*

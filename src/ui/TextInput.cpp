@@ -342,7 +342,7 @@ void TextInput::draw(UIManager &ui) {
           size.y, borderColor); // right
 
   float padding = m.padding;
-  float textY = position.y + (size.y / 2.0f) + font.baselineOffset;
+  float textY = std::round(position.y + (size.y / 2.0f) + font.baselineOffset);
   float visibleWidth = size.x - (padding * 2);
 
   float cursorLocalX = 0;
